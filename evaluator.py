@@ -1,72 +1,107 @@
-import json
+import time
 
-from analyzer import analyze_conversation
+from analyzer import analyze_conversation, validate_result
 from test_cases import TEST_CASES
 
 
-def evaluate():
+correct_sentiment = 0
+correct_urgency = 0
+completed_cases = 0
+valid_outputs = 0
 
-    total = len(TEST_CASES)
 
-    sentiment_correct = 0
-    urgency_correct = 0
+print("\n===== CONVERSATION INTELLIGENCE EVALUATION =====\n")
 
-    print("\n===== MODEL EVALUATION =====\n")
 
-    for case in TEST_CASES:
+for i, case in enumerate(TEST_CASES, start=1):
 
-        print(f"Test Case {case['id']}")
+    print(f"Test {i}/{len(TEST_CASES)}")
 
+    try:
         result = analyze_conversation(case["conversation"])
 
-        predicted_sentiment = result.get("sentiment")
-        predicted_urgency = result.get("urgency")
+        is_valid, validation_message = validate_result(result)
 
-        expected_sentiment = case["expected_sentiment"]
-        expected_urgency = case["expected_urgency"]
+        if is_valid:
+            valid_outputs += 1
 
-        sentiment_match = (
-            predicted_sentiment.lower()
-            == expected_sentiment.lower()
-        )
+        predicted_sentiment = result["sentiment"].lower()
+        expected_sentiment = case["expected_sentiment"].lower()
 
-        urgency_match = (
-            predicted_urgency.lower()
-            == expected_urgency.lower()
-        )
+        predicted_urgency = result["urgency"].lower()
+        expected_urgency = case["expected_urgency"].lower()
 
-        if sentiment_match:
-            sentiment_correct += 1
+        sentiment_correct = predicted_sentiment == expected_sentiment
+        urgency_correct = predicted_urgency == expected_urgency
 
-        if urgency_match:
-            urgency_correct += 1
+        if sentiment_correct:
+            correct_sentiment += 1
 
-        print("Expected sentiment:", expected_sentiment)
-        print("Predicted sentiment:", predicted_sentiment)
+        if urgency_correct:
+            correct_urgency += 1
 
-        print("Expected urgency:", expected_urgency)
-        print("Predicted urgency:", predicted_urgency)
+        completed_cases += 1
 
-        print("Sentiment correct:", sentiment_match)
-        print("Urgency correct:", urgency_match)
+        print(f"Expected sentiment: {case['expected_sentiment']}")
+        print(f"Predicted sentiment: {result['sentiment']}")
+        print(f"Sentiment correct: {sentiment_correct}")
 
+        print(f"Expected urgency: {case['expected_urgency']}")
+        print(f"Predicted urgency: {result['urgency']}")
+        print(f"Urgency correct: {urgency_correct}")
+
+        print(f"Output valid: {is_valid}")
         print("-" * 50)
 
-    sentiment_accuracy = sentiment_correct / total
-    urgency_accuracy = urgency_correct / total
+    except Exception as e:
 
-    print("\n===== FINAL RESULTS =====")
+        print(f"Test {i} could not be completed.")
+        print(f"Error: {e}")
+        print("-" * 50)
+
+        print("Waiting before continuing...")
+        time.sleep(60)
+
+        continue
+
+    # Wait between API requests to reduce the chance
+    # of hitting the free-tier rate limit.
+    time.sleep(5)
+
+
+print("\n===== FINAL EVALUATION =====")
+
+print(f"Completed cases: {completed_cases}/{len(TEST_CASES)}")
+
+if completed_cases > 0:
+
+    sentiment_accuracy = (
+        correct_sentiment / completed_cases
+    ) * 100
+
+    urgency_accuracy = (
+        correct_urgency / completed_cases
+    ) * 100
+
+    validation_rate = (
+        valid_outputs / completed_cases
+    ) * 100
 
     print(
         f"Sentiment accuracy: "
-        f"{sentiment_accuracy * 100:.1f}%"
+        f"{sentiment_accuracy:.2f}%"
     )
 
     print(
         f"Urgency accuracy: "
-        f"{urgency_accuracy * 100:.1f}%"
+        f"{urgency_accuracy:.2f}%"
     )
 
+    print(
+        f"Valid output rate: "
+        f"{validation_rate:.2f}%"
+    )
 
-if __name__ == "__main__":
-    evaluate()
+else:
+
+    print("No cases were completed.")
