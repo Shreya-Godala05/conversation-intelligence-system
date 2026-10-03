@@ -135,14 +135,23 @@ The .env file is excluded from Git using .gitignore.
 python -m streamlit run app.py
 
 The application will open in your browser.
-Evaluation
-The project includes a test suite containing customer-support scenarios covering different sentiment and urgency levels.
-The evaluation compares the model's predictions against expected labels for:
-- Sentiment
-- Urgency
-The project also includes validation of the generated JSON structure and a separate grounding evaluation for suggested actions.
-Evaluation results are kept separate from the application logic so that the model can be tested independently.
-Limitations
+##Evaluation
+The system was evaluated on a 20-case customer-support test set covering different sentiment and urgency scenarios.
+
+| Metric | Result |
+|---|---:|
+| Test cases completed | 20/20 |
+| Sentiment accuracy | 95% |
+| Urgency accuracy | 95% |
+| Valid structured outputs | 100% |
+
+Two classification mismatches were observed during evaluation. One involved urgency classification and one involved sentiment classification, highlighting the ambiguity that can occur in natural-language customer conversations.
+
+The evaluation is a small development benchmark and should not be interpreted as production-level model performance.
+
+The project also includes a separate grounding check for identifying recommendations that may rely on unsupported assumptions.
+
+##Limitations
 This project is a prototype designed for demonstrating LLM-based conversation analysis.
 It does not provide:
 - Real-time call transcription
