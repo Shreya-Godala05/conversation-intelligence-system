@@ -32,6 +32,10 @@ It also validates the generated output and performs a grounding check to identif
 - Interactive Streamlit interface
 - API key protection using environment variables
 
+## Demo
+
+![Conversation Intelligence System Demo](conversation-intelligence-demo.png)
+
 ## Architecture
 
 ```text
